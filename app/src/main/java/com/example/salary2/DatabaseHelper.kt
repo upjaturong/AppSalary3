@@ -9,9 +9,9 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build.ID
 import android.util.Log
 
-class DatabaseHelper (context: Context):SQLiteOpenHelper(context,dbname,factory,version){
+class DatabaseHelper (context: Context):SQLiteOpenHelper(context,dbTable,factory,version){
     override fun onCreate(p0: SQLiteDatabase?) {
-        p0?.execSQL("CREATE TABLE IF NOT EXISTS user(id integer primary key autoincrement,name varchar(30),email varchar(100) not null ,password varchar(20) not null)")
+        p0?.execSQL("CREATE TABLE IF NOT EXISTS $dbTable($ID integer primary key autoincrement,$name varchar(30),$email varchar(100) not null ,$password varchar(20) not null)")
     }
 
     override fun onUpgrade(p0: SQLiteDatabase?, p1: Int, p2: Int) {
@@ -24,14 +24,14 @@ class DatabaseHelper (context: Context):SQLiteOpenHelper(context,dbname,factory,
         values.put("name",name)
         values.put("email",email)
         values.put("password",password)
-        db.insert("user",null,values)
+        db.insert("$dbTable",null,values)
         db.close()
     }
 
     fun viewUser():String {
         var allUser:String = " "
         val db = readableDatabase
-        val selectQuery = "SELECT * FROM $dbname"
+        val selectQuery = "SELECT * FROM $dbTable"
         val cursor = db.rawQuery(selectQuery, null)
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -40,7 +40,6 @@ class DatabaseHelper (context: Context):SQLiteOpenHelper(context,dbname,factory,
                     var name = cursor.getString(cursor.getColumnIndex(name))
                     var email = cursor.getString(cursor.getColumnIndex(email))
                     var password = cursor.getString(cursor.getColumnIndex(password))
-                    allUser = "$allUser $name"
                 } while (cursor.moveToNext())
             }
         }
@@ -51,7 +50,7 @@ class DatabaseHelper (context: Context):SQLiteOpenHelper(context,dbname,factory,
 
     fun userPresent(email: String,password: String):Boolean {
         val db = writableDatabase
-        val query = "SELECT * FROM user WHERE email = '$email' AND password = '$password'"
+        val query = "SELECT * FROM $dbTable WHERE email = '$email' AND password = '$password'"
         val cursor = db.rawQuery(query, null)
         if (cursor.count <= 0) {
             cursor.close()
@@ -63,7 +62,7 @@ class DatabaseHelper (context: Context):SQLiteOpenHelper(context,dbname,factory,
 
 
     companion object{
-        internal val dbname = "user"
+        internal val dbTable = "user"
         internal val  factory = null
         internal val version = 1
         internal val ID = "id"
